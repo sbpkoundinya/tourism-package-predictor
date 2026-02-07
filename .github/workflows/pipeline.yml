@@ -1,3 +1,4 @@
+```
 name: Wellness Tourism MLOps Pipeline
 
 on:
@@ -19,13 +20,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r tourism_project/requirements.txt
 
       - name: Register dataset to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python data_registration/register_data.py
+          python tourism_project/model_building/register_data.py
 
 
   data-prep:
@@ -41,13 +42,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r tourism_project/requirements.txt
 
       - name: Run data preparation
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python data_preparation/data_prep.py
+          python tourism_project/model_building/prep.py
 
 
   model-training:
@@ -70,7 +71,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           MLFLOW_TRACKING_URI: ./mlruns
         run: |
-          python model_building/train.py
+          python tourism_project/model_building/train.py
 
 
   deploy-hosting:
@@ -89,8 +90,9 @@ jobs:
           pip install huggingface_hub
 
       - name: Deploy Streamlit app to Hugging Face Space
-
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python deployment/push_to_space.py
+          python tourism_project/hosting/hosting.py
+
+```
