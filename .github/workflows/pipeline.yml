@@ -63,7 +63,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r tourism_project/requirements.txt
 
       - name: Train model and log experiments
         env:
