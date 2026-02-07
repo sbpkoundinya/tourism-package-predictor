@@ -187,7 +187,7 @@ with mlflow.start_run():
 # ===============================
 # Upload Model to Hugging Face Hub
 # ===============================
-repo_id = "<HF_USERNAME>/wellness-tourism-model"
+repo_id = "sbpkoundinya/tourism-package-predictor"
 repo_type = "model"
 
 try:
