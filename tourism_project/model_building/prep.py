@@ -17,7 +17,7 @@ df = pd.read_csv(DATASET_PATH)
 print("Dataset loaded successfully.")
 
 # Drop unique identifier column (not useful for modeling)
-df.drop(columns=['CustomerID'], inplace=True) // CustomerID is a unique identifier and does not carry predictive information
+df.drop(columns=['CustomerID'], inplace=True) # CustomerID is a unique identifier and does not carry predictive information
 
 # Nominal categorical columns (NO inherent order)
 nominal_cols = [
