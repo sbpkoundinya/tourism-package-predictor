@@ -33,7 +33,7 @@ import mlflow.sklearn
 # ===============================
 # MLflow Configuration
 # ===============================
-mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("wellness-tourism-purchase-prediction")
 
 # ===============================
