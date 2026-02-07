@@ -1,25 +1,34 @@
-# for data manipulation
-import pandas as pd
-import sklearn
-# for creating a folder
+# ===============================
+# Imports
+# ===============================
 import os
-# for data preprocessing and pipeline creation
+import pandas as pd
 from sklearn.model_selection import train_test_split
-# for converting text data in to numerical representation
-from sklearn.preprocessing import LabelEncoder
-# for hugging face space authentication to upload files
-from huggingface_hub import login, HfApi
+from huggingface_hub import HfApi
 
-# Define constants for the dataset and output paths
-api = HfApi(token=os.getenv("HF_TOKEN"))
+# ===============================
+# Hugging Face setup
+# ===============================
+HF_TOKEN = os.getenv("HF_TOKEN")
+api = HfApi(token=HF_TOKEN)
+
 DATASET_PATH = "hf://datasets/sbpkoundinya/tourism-package-predictor/tourism.csv"
+DATASET_REPO_ID = "sbpkoundinya/tourism-package-predictor"
+
+# ===============================
+# Load dataset
+# ===============================
 df = pd.read_csv(DATASET_PATH)
 print("Dataset loaded successfully.")
 
-# Drop unique identifier column (not useful for modeling)
-df.drop(columns=['CustomerID'], inplace=True) # CustomerID is a unique identifier and does not carry predictive information
+# ===============================
+# Drop identifier column
+# ===============================
+df.drop(columns=["CustomerID"], inplace=True)
 
-# Nominal categorical columns (NO inherent order)
+# ===============================
+# Feature groups
+# ===============================
 nominal_cols = [
     "TypeofContact",
     "Occupation",
@@ -29,66 +38,76 @@ nominal_cols = [
     "Designation"
 ]
 
-# Ordinal categorical columns (ORDER matters)
 ordinal_cols = [
-    "CityTier",               # Tier 1 > Tier 2 > Tier 3
-    "PreferredPropertyStar"   # 1 to 5
+    "CityTier",
+    "PreferredPropertyStar"
 ]
 
-# Binary columns (already encoded)
 binary_cols = [
     "Passport",
     "OwnCar"
 ]
 
+numeric_cols = [
+    "Age",
+    "NumberOfPersonVisiting",
+    "NumberOfTrips",
+    "NumberOfChildrenVisiting",
+    "MonthlyIncome",
+    "PitchSatisfactionScore",
+    "NumberOfFollowups",
+    "DurationOfPitch"
+]
+
+target_col = "ProdTaken"
+
+# ===============================
 # Handle missing values
-# For categorical columns
+# ===============================
 for col in nominal_cols:
     df[col] = df[col].fillna(df[col].mode()[0])
 
-# For ordinal columns
-for col in ordinal_cols:
+for col in ordinal_cols + numeric_cols:
     df[col] = df[col].fillna(df[col].median())
 
-# Encode ordinal categorical columns
-# Explicit ordinal mapping (optional but clear)
-city_tier_mapping = {1: 1, 2: 2, 3: 3}
-property_star_mapping = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+for col in binary_cols:
+    df[col] = df[col].fillna(0)
 
-df["CityTier"] = df["CityTier"].map(city_tier_mapping)
-df["PreferredPropertyStar"] = df["PreferredPropertyStar"].map(property_star_mapping)
-
-# One-hot encode nominal categorical columns
-df = pd.get_dummies(
-    df,
-    columns=nominal_cols,
-    drop_first=True  # avoids dummy variable trap
-)
-
-# Define target variable
-target_col = 'ProdTaken'
-
-# Split into X (features) and y (target)
+# ===============================
+# Train–test split
+# ===============================
 X = df.drop(columns=[target_col])
 y = df[target_col]
 
-# Perform train-test split
 Xtrain, Xtest, ytrain, ytest = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
 )
 
-Xtrain.to_csv("Xtrain.csv",index=False)
-Xtest.to_csv("Xtest.csv",index=False)
-ytrain.to_csv("ytrain.csv",index=False)
-ytest.to_csv("ytest.csv",index=False)
+# ===============================
+# Save locally
+# ===============================
+Xtrain.to_csv("Xtrain.csv", index=False)
+Xtest.to_csv("Xtest.csv", index=False)
+ytrain.to_csv("ytrain.csv", index=False)
+ytest.to_csv("ytest.csv", index=False)
 
+print("Train/test splits saved locally.")
 
-files = ["Xtrain.csv","Xtest.csv","ytrain.csv","ytest.csv"]
+# ===============================
+# Upload to Hugging Face Dataset
+# ===============================
+files = ["Xtrain.csv", "Xtest.csv", "ytrain.csv", "ytest.csv"]
 
-for file_path in files:
+for file in files:
     api.upload_file(
-        path_or_fileobj=file_path,
-        path_in_repo=file_path.split("/")[-1],  # just the filename
-        repo_id="sbpkoundinya/tourism-package-predictor",
-        repo_type="dataset",
+        path_or_fileobj=file,
+        path_in_repo=file,
+        repo_id=DATASET_REPO_ID,
+        repo_type="dataset"
     )
+
+print("Train/test datasets uploaded to Hugging Face successfully.")
