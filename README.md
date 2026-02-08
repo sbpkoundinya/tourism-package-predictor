@@ -23,3 +23,21 @@ To build a scalable and automated machine learning system that:
 ---
 
 ## 📂 Repository Structure
+├── .github/
+│   └── workflows/
+│       └── pipeline.yml
+├── tourism_project/
+│   ├── data/
+│   │   └── tourism.csv
+│   ├── deployment/
+│   │   ├── app.py
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   ├── hosting/
+│   │   └── hosting.py
+│   ├── model_building/
+│   │   ├── data_register.py
+│   │   ├── prep.py
+│   │   └── train.py
+│   └── requirements.txt
+└── README.md
